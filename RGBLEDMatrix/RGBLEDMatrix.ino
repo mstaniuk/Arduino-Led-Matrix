@@ -62,21 +62,25 @@ ALL RED:
   .
 */
 
-void setOutputLine(uint8_t colors[8]) {
+void setOutputLine(uint8_t colors[5]) {
   for(uint8_t i = 0; i < 8; i++) {
-    
-    // Set red bit on outputs red byte from 
-    bitWrite(line, i, !bitRead(colors[i], 0));
-    
-    // set green
-    bitWrite(line, i+8, !bitRead(colors[i], 1));
-    
-    // set blue
-    bitWrite(line, i+16, !bitRead(colors[i], 2));
+    if( i > 4) {
+      // Set red bit on outputs red byte from 
+      bitWrite(line, 7 - i, !bitRead(colors[i], 0));
+      // set green
+      bitWrite(line, 7 - i + 8, !bitRead(colors[i], 1));
+      // set blue
+      bitWrite(line, 7 - i+16, !bitRead(colors[i], 2));
+    } else {
+      // Set unused pins of Shift register
+      bitWrite(line, 7 - i, 0);
+      bitWrite(line, 7 - i + 8, 0);
+      bitWrite(line, 7 - i+16, 0);
+    }
   }
 }
 
-void setScreen(uint8_t screen[5][8]) {
+void setScreen(uint8_t screen[5][5]) {
   for(byte j = 0; j < 5; j++) {
     // reset line
     line = 0;
@@ -86,6 +90,7 @@ void setScreen(uint8_t screen[5][8]) {
     
     // Set colors for line
     setOutputLine(screen[j]);
+    
     byte i = 32;
     while(true){
       i = i - 1;
@@ -114,146 +119,313 @@ void sendData() {
   digitalWrite(LATCH, LOW);
 }
 
-// My device is 5x5 so last 3 bytes are unused
-
-
-// TEMP: Test screens
-uint8_t screen_different[5][8] = 
+byte NUM_0[5][5] = 
 {
-{BLACK, BLACK, BLACK, RED, GREEN, BLUE, YELLOW, MAGENTA},
-{BLACK, BLACK, BLACK, CYAN, RED, GREEN, BLUE, YELLOW},
-{BLACK, BLACK, BLACK, BLUE, YELLOW, MAGENTA, CYAN, RED},
-{BLACK, BLACK, BLACK, YELLOW, MAGENTA, CYAN, RED, BLUE},
-{BLACK, BLACK, BLACK, MAGENTA, CYAN, RED, YELLOW, MAGENTA},
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	RED,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	RED,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	RED,	RED},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte NUM_1[5][5] = 
+{
+{	RED,	RED,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte NUM_2[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte NUM_3[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	BLACK,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte NUM_4[5][5] = 
+{
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED}
+};
+byte NUM_5[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte NUM_6[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte NUM_7[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED}
+};
+byte NUM_8[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte NUM_9[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED}
 };
 
-uint8_t screen_smile[5][8] = 
+byte CHAR_SPACE[5][5] = 
 {
-{BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK},
-{BLACK, BLACK, BLACK, BLACK, RED, BLACK, RED, BLACK},
-{BLACK, BLACK, BLACK, BLUE, BLACK, BLACK, BLACK, RED},
-{BLACK, BLACK, BLACK, BLACK, MAGENTA, BLACK, RED, BLACK},
-{BLACK, BLACK, BLACK, BLACK, BLACK, RED, BLACK, BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK}
 };
 
-uint8_t screen_heart[5][8] = 
+byte CHAR_DOT[5][5] = 
 {
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK, RED},
-  {BLACK, BLACK, BLACK, RED,   BLACK, BLACK, BLACK, RED},
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
+};
+byte CHAR_A[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED}
+};
+byte CHAR_B[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	BLACK}
+};
+byte CHAR_C[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte CHAR_D[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	BLACK}
+};
+byte CHAR_E[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte CHAR_F[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK}
+};
+byte CHAR_G[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	BLACK,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte CHAR_H[5][5] = 
+{
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED}
+};
+byte CHAR_I[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte CHAR_J[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	BLACK,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	BLACK,	RED,	RED,	RED,	RED}
+};
+byte CHAR_K[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
+};
+byte CHAR_L[5][5] = 
+{
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte CHAR_M[5][5] = 
+{
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	BLACK,	RED,	RED},
+{	RED,	BLACK,	RED,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED}
+};
+byte CHAR_N[5][5] = 
+{
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	RED,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED}
+};
+byte CHAR_O[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte CHAR_P[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK}
+};
+byte CHAR_Q[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	RED,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
+};
+byte CHAR_R[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	RED,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	RED}
+};
+byte CHAR_S[5][5] = 
+{
+{	BLACK,	RED,	RED,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	RED,	RED,	RED,	BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	BLACK}
+};
+byte CHAR_T[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
+};
+byte CHAR_U[5][5] = 
+{
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	RED,	RED,	RED,	RED}
+};
+byte CHAR_V[5][5] = 
+{
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	RED,	BLACK,	RED,	BLACK},
+{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
+};
+byte CHAR_W[5][5] = 
+{
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	RED,	BLACK,	RED,	BLACK,	RED},
+{	RED,	RED,	BLACK,	RED,	RED},
+{	RED,	BLACK,	BLACK,	BLACK,	RED}
+};
+byte CHAR_X[5][5] = 
+{
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	BLACK,	RED,	BLACK,	RED,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	RED,	BLACK,	RED,	BLACK},
+{	RED,	BLACK,	BLACK,	BLACK,	RED}
+};
+byte CHAR_Y[5][5] = 
+{
+{	RED,	BLACK,	BLACK,	BLACK,	RED},
+{	BLACK,	RED,	BLACK,	RED,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
+};
+byte CHAR_Z[5][5] = 
+{
+{	RED,	RED,	RED,	RED,	RED},
+{	BLACK,	BLACK,	BLACK,	RED,	BLACK},
+{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
+{	RED,	RED,	BLACK,	BLACK,	BLACK},
+{	RED,	RED,	RED,	RED,	RED}
 };
 
-// Screens of animated heart
-uint8_t screen_heart_fill1[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK},
-};
-
-uint8_t screen_heart_fill2[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK},
-  {BLACK, BLACK, BLACK, BLACK, RED,   RED,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK},
-};
-
-uint8_t screen_heart_fill3[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK},
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, RED,   RED,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK},
-};
-
-uint8_t screen_heart_fill4[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, RED,   RED,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, BLACK, RED,   RED,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-};
-
-uint8_t screen_heart_fill5[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, BLACK, RED,   RED,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-};
-
-uint8_t screen_heart_fill6[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, BLUE,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLUE,   RED,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, BLACK, RED,   RED,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-};
-
-uint8_t screen_heart_fill7[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, RED,   BLUE,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, BLUE,   RED,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, BLACK, RED,   RED,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-};
-
-
-uint8_t screen_heart_fill8[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLUE,   BLACK},
-  {BLACK, BLACK, BLACK, RED,   RED,   BLUE,   RED,   RED},
-  {BLACK, BLACK, BLACK, RED,   BLUE,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, BLACK, RED,   RED,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-};
-
-uint8_t screen_heart_fill9[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   BLUE,   RED},
-  {BLACK, BLACK, BLACK, RED,   RED,   BLUE,   RED,   RED},
-  {BLACK, BLACK, BLACK, BLACK, BLUE,   RED,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-};
-
-uint8_t screen_heart_fill10[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   RED,   BLUE},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   BLUE,   RED},
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLUE,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-};
-
-uint8_t screen_heart_fill11[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   RED,   BLUE},
-  {BLACK, BLACK, BLACK, BLACK, RED,   RED,   BLUE,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, BLUE,   BLACK, BLACK},
-};
-
-uint8_t screen_heart_fill12[5][8] = 
-{
-  {BLACK, BLACK, BLACK, BLACK, RED,   BLACK, RED,   BLACK},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, RED,   RED,   RED,   RED,   RED},
-  {BLACK, BLACK, BLACK, BLACK, RED,   RED,   RED,   BLACK},
-  {BLACK, BLACK, BLACK, BLACK, BLACK, RED,   BLACK, BLACK},
-};
 
 void setup() 
 {
@@ -282,47 +454,47 @@ void loop()
     if(millis() - lastTime > 100) {
       lastTime = millis();
       stage = 1 + stage;
-      if(stage > 11) stage = 11;
     }
+    setScreen(CHAR_SPACE);
+    setScreen(CHAR_DOT);
     
-    switch(stage) {
-      case 0:
-        setScreen(screen_heart_fill1);
-        break;
-      case 1:
-        setScreen(screen_heart_fill2);
-        break;
-      case 2:
-        setScreen(screen_heart_fill3);
-        break;
-      case 3:
-        setScreen(screen_heart_fill4);
-        break;
-      case 4:
-        setScreen(screen_heart_fill5);
-        break;
-      case 5:
-        setScreen(screen_heart_fill6);
-        break;
-      case 6:
-        setScreen(screen_heart_fill7);
-        break;
-      case 7:
-        setScreen(screen_heart_fill8);
-        break;
-      case 8:
-        setScreen(screen_heart_fill9);
-        break;
-      case 9:
-        setScreen(screen_heart_fill10);
-        break;
-      case 10:
-        setScreen(screen_heart_fill11);
-        break;
-      case 11:
-        setScreen(screen_heart_fill12);
-        break;
-    }    
-}
+    setScreen(NUM_0);
+    setScreen(NUM_1);
+    setScreen(NUM_2);
+    setScreen(NUM_3);
+    setScreen(NUM_4);
+    setScreen(NUM_5);
+    setScreen(NUM_6);
+    setScreen(NUM_7);
+    setScreen(NUM_8);
+    setScreen(NUM_9);
+    
+    setScreen(CHAR_A);
+    setScreen(CHAR_B);
+    setScreen(CHAR_C);
+    setScreen(CHAR_D);
+    setScreen(CHAR_E);
+    setScreen(CHAR_F);
+    setScreen(CHAR_G);
+    setScreen(CHAR_H);
+    setScreen(CHAR_I);
+    setScreen(CHAR_J);
+    setScreen(CHAR_K);
+    setScreen(CHAR_K);
+    setScreen(CHAR_M);
+    setScreen(CHAR_N);
+    setScreen(CHAR_O);
+    setScreen(CHAR_P);
+    setScreen(CHAR_Q);
+    setScreen(CHAR_R);
+    setScreen(CHAR_S);
+    setScreen(CHAR_T);
+    setScreen(CHAR_U);
+    setScreen(CHAR_V);
+    setScreen(CHAR_W);
+    setScreen(CHAR_X);
+    setScreen(CHAR_Y);
+    setScreen(CHAR_Z);
+  }
 
 
