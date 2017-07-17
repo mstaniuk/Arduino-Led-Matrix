@@ -3,9 +3,6 @@ const uint8_t DATA                = 10;
 const uint8_t LATCH               = 9;
 const uint8_t CLOCK               = 8;
 
-// Define time variable
-long mTime                        = 0;
-
 //// Colors:
 // Color:
 // B | 0 | 0 | 0 | 0 | 0 | b | g | r |
@@ -26,8 +23,10 @@ const uint8_t WHITE     = B00000111;
 // Timing
 long lastTime = 0;
 
-// TODO: Change global stage to funciton that hangle any size animation
+
 int stage = 0;
+int substage = 0;
+
 
 // global variable for one row of colors
 unsigned long line = 0;
@@ -62,9 +61,9 @@ ALL RED:
   .
 */
 
-void setOutputLine(uint8_t colors[5]) {
+void setOutputLine(byte colors[5]) {
   for(uint8_t i = 0; i < 8; i++) {
-    if( i > 4) {
+    if( i <= 4) {
       // Set red bit on outputs red byte from 
       bitWrite(line, 7 - i, !bitRead(colors[i], 0));
       // set green
@@ -80,7 +79,7 @@ void setOutputLine(uint8_t colors[5]) {
   }
 }
 
-void setScreen(uint8_t screen[5][5]) {
+void setScreen(byte screen[5][5]) {
   for(byte j = 0; j < 5; j++) {
     // reset line
     line = 0;
@@ -104,7 +103,7 @@ void setScreen(uint8_t screen[5][5]) {
 }
 
 // Send bit to 74hc595s memory
-void sendBit(uint8_t aData)
+void sendBit(byte aData)
 {
   digitalWrite(DATA,  aData);  
   digitalWrite(CLOCK, HIGH);
@@ -119,313 +118,155 @@ void sendData() {
   digitalWrite(LATCH, LOW);
 }
 
-byte NUM_0[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	RED,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	RED,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	RED,	RED},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte NUM_1[5][5] = 
-{
-{	RED,	RED,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte NUM_2[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte NUM_3[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	BLACK,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte NUM_4[5][5] = 
-{
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED}
-};
-byte NUM_5[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte NUM_6[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte NUM_7[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED}
-};
-byte NUM_8[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte NUM_9[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED}
-};
+byte NUM_0[5][5]={{RED,RED,RED,RED,RED},{RED,RED,BLACK,BLACK,RED},{RED,BLACK,RED,BLACK,RED},{RED,BLACK,BLACK,RED,RED},{RED,RED,RED,RED,RED}};
+byte NUM_1[5][5]={{RED,RED,RED,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{RED,RED,RED,RED,RED}};
+byte NUM_2[5][5]={{RED,RED,RED,RED,RED},{BLACK,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,BLACK},{RED,RED,RED,RED,RED}};
+byte NUM_3[5][5]={{RED,RED,RED,RED,RED},{BLACK,BLACK,BLACK,BLACK,RED},{BLACK,RED,RED,RED,RED},{BLACK,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED}};
+byte NUM_4[5][5]={{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED},{BLACK,BLACK,BLACK,BLACK,RED},{BLACK,BLACK,BLACK,BLACK,RED}};
+byte NUM_5[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,BLACK},{RED,RED,RED,RED,RED},{BLACK,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED}};
+byte NUM_6[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,BLACK},{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED}};
+byte NUM_7[5][5]={{RED,RED,RED,RED,RED},{BLACK,BLACK,BLACK,BLACK,RED},{BLACK,BLACK,BLACK,BLACK,RED},{BLACK,BLACK,BLACK,BLACK,RED},{BLACK,BLACK,BLACK,BLACK,RED}};
+byte NUM_8[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED}};
+byte NUM_9[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED},{BLACK,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED}};
+byte CHAR_SPACE[5][5]={{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,BLACK,BLACK,BLACK}};
+byte CHAR_DOT[5][5]={{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK}};
+byte CHAR_A[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED}};
+byte CHAR_B[5][5]={{RED,RED,RED,RED,BLACK},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,BLACK},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,BLACK}};
+byte CHAR_C[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,BLACK},{RED,BLACK,BLACK,BLACK,BLACK},{RED,BLACK,BLACK,BLACK,BLACK},{RED,RED,RED,RED,RED}};
+byte CHAR_D[5][5]={{RED,RED,RED,RED,BLACK},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,BLACK}};
+byte CHAR_E[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,BLACK},{RED,RED,RED,RED,BLACK},{RED,BLACK,BLACK,BLACK,BLACK},{RED,RED,RED,RED,RED}};
+byte CHAR_F[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,BLACK},{RED,RED,RED,RED,BLACK},{RED,BLACK,BLACK,BLACK,BLACK},{RED,BLACK,BLACK,BLACK,BLACK}};
+byte CHAR_G[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,BLACK},{RED,BLACK,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED}};
+byte CHAR_H[5][5]={{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED}};
+byte CHAR_I[5][5]={{RED,RED,RED,RED,RED},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{RED,RED,RED,RED,RED}};
+byte CHAR_J[5][5]={{RED,RED,RED,RED,RED},{BLACK,BLACK,BLACK,BLACK,RED},{BLACK,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{BLACK,RED,RED,RED,RED}};
+byte CHAR_K[5][5]={{RED,BLACK,BLACK,RED,RED},{RED,BLACK,RED,BLACK,BLACK},{RED,RED,BLACK,BLACK,BLACK},{RED,BLACK,RED,BLACK,BLACK},{RED,BLACK,BLACK,RED,RED}};
+byte CHAR_L[5][5]={{RED,BLACK,BLACK,BLACK,BLACK},{RED,BLACK,BLACK,BLACK,BLACK},{RED,BLACK,BLACK,BLACK,BLACK},{RED,BLACK,BLACK,BLACK,BLACK},{RED,RED,RED,RED,RED}};
+byte CHAR_M[5][5]={{RED,BLACK,BLACK,BLACK,RED},{RED,RED,BLACK,RED,RED},{RED,BLACK,RED,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED}};
+byte CHAR_N[5][5]={{RED,BLACK,BLACK,BLACK,RED},{RED,RED,BLACK,BLACK,RED},{RED,BLACK,RED,BLACK,RED},{RED,BLACK,BLACK,RED,RED},{RED,BLACK,BLACK,BLACK,RED}};
+byte CHAR_O[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED}};
+byte CHAR_P[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,BLACK},{RED,BLACK,BLACK,BLACK,BLACK}};
+byte CHAR_Q[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,RED,BLACK,RED},{RED,RED,RED,RED,RED},{BLACK,BLACK,RED,BLACK,BLACK}};
+byte CHAR_R[5][5]={{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED},{RED,BLACK,BLACK,RED,BLACK},{RED,BLACK,BLACK,BLACK,RED}};
+byte CHAR_S[5][5]={{BLACK,RED,RED,RED,RED},{RED,BLACK,BLACK,BLACK,BLACK},{BLACK,RED,RED,RED,BLACK},{BLACK,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,BLACK}};
+byte CHAR_T[5][5]={{RED,RED,RED,RED,RED},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK}};
+byte CHAR_U[5][5]={{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,RED,RED,RED,RED}};
+byte CHAR_V[5][5]={{RED,BLACK,BLACK,BLACK,RED},{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,RED,BLACK,RED,BLACK},{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK}};
+byte CHAR_W[5][5]={{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,BLACK,BLACK,RED},{RED,BLACK,RED,BLACK,RED},{RED,RED,BLACK,RED,RED},{RED,BLACK,BLACK,BLACK,RED}};
+byte CHAR_X[5][5]={{RED,BLACK,BLACK,BLACK,RED},{BLACK,RED,BLACK,RED,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,RED,BLACK,RED,BLACK},{RED,BLACK,BLACK,BLACK,RED}};
+byte CHAR_Y[5][5]={{RED,BLACK,BLACK,BLACK,RED},{BLACK,RED,BLACK,RED,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK}};
+byte CHAR_Z[5][5]={{RED,RED,RED,RED,RED},{BLACK,BLACK,BLACK,RED,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{RED,RED,BLACK,BLACK,BLACK},{RED,RED,RED,RED,RED}};
+byte CHAR_COLON[5][5]={{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,BLACK,BLACK,BLACK},{BLACK,BLACK,RED,BLACK,BLACK},{BLACK,BLACK,BLACK,BLACK,BLACK}};
 
-byte CHAR_SPACE[5][5] = 
-{
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK}
-};
+void setChar(byte target[5][5], char character) {
+  switch(character) {
+    case ' ': memcpy(target, CHAR_SPACE, sizeof(CHAR_SPACE)); break;
+    case ':': memcpy(target, CHAR_COLON, sizeof(CHAR_COLON)); break;
+    case '0': memcpy(target, NUM_0, sizeof(NUM_0)); break;
+    case '1': memcpy(target, NUM_1, sizeof(NUM_1)); break;
+    case '2': memcpy(target, NUM_2, sizeof(NUM_2)); break;
+    case '3': memcpy(target, NUM_3, sizeof(NUM_3)); break;
+    case '4': memcpy(target, NUM_4, sizeof(NUM_4)); break;
+    case '5': memcpy(target, NUM_5, sizeof(NUM_5)); break;
+    case '6': memcpy(target, NUM_6, sizeof(NUM_6)); break;
+    case '7': memcpy(target, NUM_7, sizeof(NUM_7)); break;
+    case '8': memcpy(target, NUM_8, sizeof(NUM_8)); break;
+    case '9': memcpy(target, NUM_9, sizeof(NUM_9)); break;
+    case 'a': case 'A': memcpy(target, CHAR_A, sizeof(CHAR_A)); break;
+    case 'b': case 'B': memcpy(target, CHAR_B, sizeof(CHAR_B)); break;
+    case 'c': case 'C': memcpy(target, CHAR_C, sizeof(CHAR_C)); break;
+    case 'd': case 'D': memcpy(target, CHAR_D, sizeof(CHAR_D)); break;
+    case 'e': case 'E': memcpy(target, CHAR_E, sizeof(CHAR_E)); break;
+    case 'f': case 'F': memcpy(target, CHAR_F, sizeof(CHAR_F)); break;
+    case 'g': case 'G': memcpy(target, CHAR_G, sizeof(CHAR_G)); break;
+    case 'h': case 'H': memcpy(target, CHAR_H, sizeof(CHAR_H)); break;
+    case 'i': case 'I': memcpy(target, CHAR_I, sizeof(CHAR_I)); break;
+    case 'j': case 'J': memcpy(target, CHAR_J, sizeof(CHAR_J)); break;
+    case 'k': case 'K': memcpy(target, CHAR_K, sizeof(CHAR_K)); break;
+    case 'l': case 'L': memcpy(target, CHAR_L, sizeof(CHAR_L)); break;
+    case 'm': case 'M': memcpy(target, CHAR_M, sizeof(CHAR_M)); break;
+    case 'n': case 'N': memcpy(target, CHAR_N, sizeof(CHAR_N)); break;
+    case 'o': case 'O': memcpy(target, CHAR_O, sizeof(CHAR_O)); break;
+    case 'p': case 'P': memcpy(target, CHAR_P, sizeof(CHAR_P)); break;
+    case 'q': case 'Q': memcpy(target, CHAR_Q, sizeof(CHAR_Q)); break;
+    case 'r': case 'R': memcpy(target, CHAR_R, sizeof(CHAR_R)); break;
+    case 's': case 'S': memcpy(target, CHAR_S, sizeof(CHAR_S)); break;
+    case 't': case 'T': memcpy(target, CHAR_T, sizeof(CHAR_T)); break;
+    case 'u': case 'U': memcpy(target, CHAR_U, sizeof(CHAR_U)); break;
+    case 'v': case 'V': memcpy(target, CHAR_V, sizeof(CHAR_V)); break;
+    case 'w': case 'W': memcpy(target, CHAR_W, sizeof(CHAR_W)); break;
+    case 'x': case 'X': memcpy(target, CHAR_X, sizeof(CHAR_X)); break;
+    case 'y': case 'Y': memcpy(target, CHAR_Y, sizeof(CHAR_Y)); break;
+    case 'z' : case 'Z' : memcpy(target, CHAR_Z, sizeof(CHAR_Z)); break;
+    default: memcpy(target, CHAR_DOT, sizeof(CHAR_DOT));
+  }
+}
 
-byte CHAR_DOT[5][5] = 
-{
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
-};
-byte CHAR_A[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED}
-};
-byte CHAR_B[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	BLACK}
-};
-byte CHAR_C[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte CHAR_D[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	BLACK}
-};
-byte CHAR_E[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte CHAR_F[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK}
-};
-byte CHAR_G[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	BLACK,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte CHAR_H[5][5] = 
-{
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED}
-};
-byte CHAR_I[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte CHAR_J[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	BLACK,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	BLACK,	RED,	RED,	RED,	RED}
-};
-byte CHAR_K[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
-};
-byte CHAR_L[5][5] = 
-{
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte CHAR_M[5][5] = 
-{
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	BLACK,	RED,	RED},
-{	RED,	BLACK,	RED,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED}
-};
-byte CHAR_N[5][5] = 
-{
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	RED,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED}
-};
-byte CHAR_O[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte CHAR_P[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK}
-};
-byte CHAR_Q[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	RED,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
-};
-byte CHAR_R[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	RED,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	RED}
-};
-byte CHAR_S[5][5] = 
-{
-{	BLACK,	RED,	RED,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	RED,	RED,	RED,	BLACK},
-{	BLACK,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	BLACK}
-};
-byte CHAR_T[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
-};
-byte CHAR_U[5][5] = 
-{
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	RED,	RED,	RED,	RED}
-};
-byte CHAR_V[5][5] = 
-{
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	RED,	BLACK,	RED,	BLACK},
-{	BLACK,	BLACK,	BLACK,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
-};
-byte CHAR_W[5][5] = 
-{
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	RED,	BLACK,	RED,	BLACK,	RED},
-{	RED,	RED,	BLACK,	RED,	RED},
-{	RED,	BLACK,	BLACK,	BLACK,	RED}
-};
-byte CHAR_X[5][5] = 
-{
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	BLACK,	RED,	BLACK,	RED,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	RED,	BLACK,	RED,	BLACK},
-{	RED,	BLACK,	BLACK,	BLACK,	RED}
-};
-byte CHAR_Y[5][5] = 
-{
-{	RED,	BLACK,	BLACK,	BLACK,	RED},
-{	BLACK,	RED,	BLACK,	RED,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK}
-};
-byte CHAR_Z[5][5] = 
-{
-{	RED,	RED,	RED,	RED,	RED},
-{	BLACK,	BLACK,	BLACK,	RED,	BLACK},
-{	BLACK,	BLACK,	RED,	BLACK,	BLACK},
-{	RED,	RED,	BLACK,	BLACK,	BLACK},
-{	RED,	RED,	RED,	RED,	RED}
-};
+void writeText(String text) {
+  if(millis() - lastTime > 200) {
+    
+    lastTime = millis();
+    
+    if(stage >= text.length()) {
+      stage = 0;
+    } else {
+      stage += 1;
+    }
+  }
+  
+  char character = text.charAt(stage);
+  byte charMatrix[5][5];
+  setChar(charMatrix, character);
+  
+  setScreen(charMatrix);
+}
 
+void slideText(String text) {
+  slideText(text, 0);
+}
+
+void slideText(String text, byte space) {
+  int slideTime = 750;
+  if(millis() - lastTime > slideTime) {
+    
+    lastTime = millis();
+    substage = 0;
+    
+    if(stage >= text.length()-1) {
+      stage = 0;
+    } else {
+      stage += 1;
+    }
+  } else if ((millis() - lastTime) / (slideTime / (5 + space)) > substage) {
+    substage += 1;
+  }
+  
+  char character = text.charAt(stage);
+  char nextCharacter = text.charAt(stage+1);
+  char i = 0;
+  char j = 0;
+  char k = 0;
+  byte charMatrix[5][5];
+  byte nextCharMatrix[5][5];
+  byte finalCharMatrix[5][5];
+  
+  setChar(charMatrix, character);
+  if(stage == text.length()-1) {
+    setChar(nextCharMatrix, ' ');
+  } else {
+    setChar(nextCharMatrix, nextCharacter);
+  }
+
+  for(; i<5; i++) {
+      byte newRow[5] = {0, 0, 0, 0, 0};
+      memcpy(newRow, charMatrix[i] + min(max(0, substage),5) * sizeof(byte), sizeof(newRow) - min(max(0, substage),5) * sizeof(byte));
+      memcpy(newRow + (5 - min(max(0, substage - space),5)) * sizeof(byte), nextCharMatrix[i], min(max(0, substage - space),5) * sizeof(byte));
+
+      memmove(finalCharMatrix[i], newRow, sizeof(newRow));
+  }
+  
+  setScreen(finalCharMatrix);
+}
 
 void setup() 
 {
@@ -445,56 +286,13 @@ void setup()
   sendData();
   
   // init timing
-  lastTime = millis();
+  lastTime = millis(); 
 }
 
 void loop() 
 {  
-  // TODO Change stage/step based animation to proper animation handling function
-    if(millis() - lastTime > 100) {
-      lastTime = millis();
-      stage = 1 + stage;
-    }
-    setScreen(CHAR_SPACE);
-    setScreen(CHAR_DOT);
-    
-    setScreen(NUM_0);
-    setScreen(NUM_1);
-    setScreen(NUM_2);
-    setScreen(NUM_3);
-    setScreen(NUM_4);
-    setScreen(NUM_5);
-    setScreen(NUM_6);
-    setScreen(NUM_7);
-    setScreen(NUM_8);
-    setScreen(NUM_9);
-    
-    setScreen(CHAR_A);
-    setScreen(CHAR_B);
-    setScreen(CHAR_C);
-    setScreen(CHAR_D);
-    setScreen(CHAR_E);
-    setScreen(CHAR_F);
-    setScreen(CHAR_G);
-    setScreen(CHAR_H);
-    setScreen(CHAR_I);
-    setScreen(CHAR_J);
-    setScreen(CHAR_K);
-    setScreen(CHAR_K);
-    setScreen(CHAR_M);
-    setScreen(CHAR_N);
-    setScreen(CHAR_O);
-    setScreen(CHAR_P);
-    setScreen(CHAR_Q);
-    setScreen(CHAR_R);
-    setScreen(CHAR_S);
-    setScreen(CHAR_T);
-    setScreen(CHAR_U);
-    setScreen(CHAR_V);
-    setScreen(CHAR_W);
-    setScreen(CHAR_X);
-    setScreen(CHAR_Y);
-    setScreen(CHAR_Z);
-  }
+  slideText(" Quick brown fox jumped over the lazy dog ", 3);
+}
+
 
 
